@@ -1,25 +1,25 @@
 . .\Include.ps1
 
-$Path = ".\Bin\NVIDIA-Alexis78xevan\ccminer_x86.exe"
-$Uri = "https://github.com/nemosminer/ccminer-xevan/releases/download/ccminer-xevan/ccminer_x86.7z"
+$Path = ".\Bin\NVIDIA-Nanashi\ccminer.exe"
+$Uri = "https://github.com/Nanashi-Meiyo-Meijin/ccminer/releases/download/v2.2-mod-r2/2.2-mod-r2-CUDA9.binary.zip"
 
 $Commands = [PSCustomObject]@{
+    #"phi" = " -d $SelGPUCC --api-remote" #Phi
     #"bitcore" = " -d $SelGPUCC" #Bitcore
-    #"jha" = " -d $SelGPUCC" #Jha
+    #"jha" = " -d $SelGPUCC --api-remote --api-allow=0/0" #Jha
     #"blake2s" = " -d $SelGPUCC" #Blake2s
     #"blakecoin" = " -d $SelGPUCC" #Blakecoin
     #"vanilla" = "" #BlakeVanilla
-    #"cryptonight" = "" #Cryptonight
+    #"cryptonight" = " -i 10 -d $SelGPUCC" #Cryptonight
     #"decred" = "" #Decred
     #"equihash" = "" #Equihash
     #"ethash" = "" #Ethash
-    "xevan" = " -i 21.262 -d $SelGPUCC --api-remote" #Xevan
-    #"groestl" = "" #Groestl
-    #"hmq1725" = " -d $SelGPUCC" #hmq1725
-    #"keccak" = " -d $SelGPUCC -m 2 --api-remote" #Keccak
+    #"groestl" = " -d $SelGPUCC --api-remote --api-allow=0/0" #Groestl
+    #"hmq1725" = " -d $SelGPUCC --api-remote --api-allow=0/0" #hmq1725
+    #"keccak" = "" #Keccak
     #"lbry" = " -d $SelGPUCC" #Lbry
-    #"lyra2v2" = "" #Lyra2RE2
-    #"lyra2z" = "" #Lyra2z
+    #"lyra2v2" = " -i 21.6 -R 5 -N 3 -d $SelGPUCC --api-remote --api-allow=0/0" #Lyra2RE2
+    #"lyra2z" = " -d $SelGPUCC" #Lyra2z
     #"myr-gr" = "" #MyriadGroestl
     #"neoscrypt" = " -d $SelGPUCC" #NeoScrypt
     #"nist5" = "" #Nist5
@@ -29,12 +29,12 @@ $Commands = [PSCustomObject]@{
     #"sia" = "" #Sia
     #"sib" = "" #Sib
     #"skein" = "" #Skein
-    #"skunk" = " -i 26 -d $SelGPUCC" #Skunk
-    #"timetravel" = " -d $SelGPUCC" #Timetravel
-    #"tribus" = " -d $SelGPUCC" #Tribus
+    #"skunk" = " -d $SelGPUCC" #Skunk
+    #"timetravel" = " -d $SelGPUCC --api-remote --api-allow=0/0" #Timetravel
+    #"tribus" = " -d $SelGPUCC --api-remote --api-allow=0/0" #Tribus
     #"x11" = "" #X11
     #"veltor" = "" #Veltor
-    #"x11evo" = " -d $SelGPUCC" #X11evo
+    #"x11evo" = " -d $SelGPUCC --api-remote --api-allow=0/0" #X11evo
     #"x17" = " -d $SelGPUCC" #X17
     #"yescrypt" = "" #Yescrypt
 }
@@ -46,7 +46,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | 
         Type = "NVIDIA"
         Path = $Path
         Arguments = "-b $($Variables.MinerAPITCPPort) -a $_ -o stratum+tcp://$($Pools.(Get-Algorithm($_)).Host):$($Pools.(Get-Algorithm($_)).Port) -u $($Pools.(Get-Algorithm($_)).User) -p $($Pools.(Get-Algorithm($_)).Pass)$($Commands.$_)"
-        HashRates = [PSCustomObject]@{(Get-Algorithm($_)) = $Stats."$($Name)_$(Get-Algorithm($_))_HashRate".Day}
+        HashRates = [PSCustomObject]@{(Get-Algorithm($_)) = $Stats."$($Name)_$(Get-Algorithm($_))_HashRate".Hour}
         API = "Ccminer"
         Port = $Variables.MinerAPITCPPort
         Wrap = $false

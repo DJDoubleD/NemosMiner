@@ -1,7 +1,7 @@
 . .\Include.ps1
 
 $Path = ".\Bin\NVIDIA-ccminerRaven\ccminer.exe"
-$Uri = "https://github.com/Ravencoin-Miner/Ravencoin/releases/download/v2.5/Ravencoin.Miner.v2.5.zip"
+$Uri = "https://github.com/Ravencoin-Miner/Ravencoin/releases/download/v2.5.1/Ravencoin.Miner.v2.5.1.zip"
 
 $Commands = [PSCustomObject]@{
     #"phi" = " -d $SelGPUCC" #Phi
@@ -36,7 +36,7 @@ $Commands = [PSCustomObject]@{
     #"veltor" = "" #Veltor
     #"x11evo" = " -d $SelGPUCC" #X11evo
     #"x17" = " -d $SelGPUCC --api-remote" #X17
-    "x16r" = " -i 21 -d $SelGPUCC --api-remote --api-allow=0/0" #X16r
+    #"x16r" = " -i 21 -d $SelGPUCC --api-remote --api-allow=0/0 --donate 0" #X16r
     #"x16s" = " -d $SelGPUCC --api-remote --api-allow=0/0" #X16s
 }
 

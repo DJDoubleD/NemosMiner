@@ -1,0 +1,98 @@
+{
+	"blake2s": {
+		"name": "blake2s",
+		"port": 5766,
+		"coins": 3,
+		"fees": 0.9,
+		"hashrate": 32850739289730,
+		"workers": 4779,
+		"estimate_current": "0.00000600",
+		"estimate_last24h": "0.00000608",
+		"actual_last24h": "0.00520",
+		"hashrate_last24h": 30813877201181
+	},
+	"keccak": {
+		"name": "keccak",
+		"port": 5133,
+		"coins": 2,
+		"fees": 1,
+		"hashrate": 4527639759982,
+		"workers": 1230,
+		"estimate_current": "0.00006868",
+		"estimate_last24h": "0.00007302",
+		"actual_last24h": "0.06885",
+		"hashrate_last24h": 3829590325552.6
+	},
+	"keccakc": {
+		"name": "keccakc",
+		"port": 5134,
+		"coins": 1,
+		"fees": 0.9,
+		"hashrate": 0,
+		"workers": 0,
+		"estimate_current": "0.00005663",
+		"estimate_last24h": "0.00009732",
+		"actual_last24h": 0,
+		"hashrate_last24h": 0
+	},
+	"lyra2v2": {
+		"name": "lyra2v2",
+		"port": 4533,
+		"coins": 2,
+		"fees": 0.9,
+		"hashrate": 43980465,
+		"workers": 1,
+		"estimate_current": "0.00000160",
+		"estimate_last24h": "0.00000140",
+		"actual_last24h": "0.00000",
+		"hashrate_last24h": 174242050.7917
+	},
+	"scrypt": {
+		"name": "scrypt",
+		"port": 3433,
+		"coins": 2,
+		"fees": 0.9,
+		"hashrate": 0,
+		"workers": 0,
+		"estimate_current": "0.00000062",
+		"estimate_last24h": "0.00000064",
+		"actual_last24h": 0,
+		"hashrate_last24h": 0
+	},
+	"x16r": {
+		"name": "x16r",
+		"port": 3636,
+		"coins": 1,
+		"fees": 0,
+		"hashrate": 1422206518,
+		"workers": 23,
+		"estimate_current": "0.00001584",
+		"estimate_last24h": "0.00001503",
+		"actual_last24h": "0.02428",
+		"hashrate_last24h": 1434338184.6146
+	},
+	"x17": {
+		"name": "x17",
+		"port": 3737,
+		"coins": 2,
+		"fees": 0.9,
+		"hashrate": 0,
+		"workers": 0,
+		"estimate_current": "0.00001907",
+		"estimate_last24h": "0.00001394",
+		"actual_last24h": "0.00000",
+		"hashrate_last24h": 106896.9792
+	},
+	"yescryptR16": {
+		"name": "yescryptR16",
+		"port": 6333,
+		"coins": 1,
+		"fees": 1,
+		"hashrate": 21829,
+		"workers": 135,
+		"estimate_current": "0.02510306",
+		"estimate_last24h": "0.03769430",
+		"actual_last24h": "43.79513",
+		"hashrate_last24h": 22956.9271
+	}
+}

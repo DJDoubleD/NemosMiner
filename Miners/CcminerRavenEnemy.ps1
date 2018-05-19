@@ -5,7 +5,7 @@ $Uri = 'https://mega.nz/#!JDAm3TJb!BMQPYJz5_nmkZEZB0UUwWicopIdgnHG82Ht5buWxZxo'
 
 $Commands = [PSCustomObject]@{
     #"x17" = ' -i 21.5 --api-remote '
-    "x16r" = ' -i 21.5 --api-remote '
+    #"x16r" = ' -i 21.5 --api-remote '
 }
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName

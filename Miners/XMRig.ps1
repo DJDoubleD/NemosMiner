@@ -4,7 +4,7 @@ $Path = ".\Bin\NVIDIA-XMRig\xmrig-nvidia.exe"
 $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.6.0-beta1/xmrig-nvidia-2.6.0-beta1-cuda9-win64.zip"
 
 $Commands = [PSCustomObject]@{
-    "cryptonight" = " --cuda-devices $SelGPUCC" #Cryptonight
+    #"cryptonight" = " --cuda-devices $SelGPUCC" #Cryptonight
     "cryptonight-lite" = " --cuda-devices $SelGPUCC" #Cryptonight-lite
 	#"cryptonightV7" = " --cuda-devices $SelGPUCC" #CryptonightV7
 }
