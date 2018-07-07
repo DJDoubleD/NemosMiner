@@ -20,28 +20,13 @@ $Locations | ForEach {
         $phiphipool_Algorithm = Get-Algorithm $phiphipool_Request.$_.name
         $phiphipool_Coin = ""
 
-        $Divisor = 1000000000
-
-        switch ($phiphipool_Algorithm) {
-            "equihash"{$Divisor /= 1000}
-			"blake2s"{$Divisor *= 1000}
-			"sha256"{$Divisor *= 1000}
-			"sha256t"{$Divisor *= 1000}
-			"blakecoin"{$Divisor *= 1000}
-			"decred"{$Divisor *= 1000}
-			"keccak"{$Divisor *= 1000}
-			"keccakc"{$Divisor *= 1000}
-			"vanilla"{$Divisor *= 1000}
-			"x11"{$Divisor *= 1000}
-			"scrypt"{$Divisor *= 1000}
-			"qubit"{$Divisor *= 1000}
-			"yescrypt"{$Divisor /= 1000}
-        }
+        $Divisor = 1000000 * [Double]$phiphipool_Request.$_.mbtc_mh_factor
 
         if ((Get-Stat -Name "$($Name)_$($phiphipool_Algorithm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($phiphipool_Algorithm)_Profit" -Value ([Double]$phiphipool_Request.$_.actual_last24h / $Divisor)}
         else {$Stat = Set-Stat -Name "$($Name)_$($phiphipool_Algorithm)_Profit" -Value ([Double]$phiphipool_Request.$_.actual_last24h / $Divisor * (1 - ($phiphipool_Request.$_.fees / 100)))}
 
         $ConfName = if ($Config.PoolsConfig.$Name -ne $Null) {$Name}else {"default"}
+		$PwdCurr = if ($Config.PoolsConfig.$ConfName.PwdCurrency) {$Config.PoolsConfig.$ConfName.PwdCurrency}else {$Config.Passwordcurrency}
 	
         if ($Config.PoolsConfig.default.Wallet) {
             [PSCustomObject]@{
@@ -54,7 +39,7 @@ $Locations | ForEach {
                 Host          = $phiphipool_Host
                 Port          = $phiphipool_Port
                 User          = $Config.PoolsConfig.$ConfName.Wallet
-                Pass          = "$($Config.PoolsConfig.$ConfName.WorkerName),c=$Passwordcurrency"
+                Pass          = "$($Config.PoolsConfig.$ConfName.WorkerName),c=$($PwdCurr)"
                 Location      = $Location
                 SSL           = $false
             }

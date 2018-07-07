@@ -1,41 +1,41 @@
-. .\Include.ps1
+if (!(IsLoaded(".\Include.ps1"))) {. .\Include.ps1;RegisterLoaded(".\Include.ps1")}
 
 $Path = ".\Bin\NVIDIA-Alexis78\ccminer.exe"
 $Uri = "https://github.com/nemosminer/ccminerAlexis78/releases/download/Alexis78-v1.2/ccminerAlexis78v1.2x32.7z"
 
 $Commands = [PSCustomObject]@{
-    "hsr" = " -d $SelGPUCC --api-remote" #Hsr
-	"poly" = " -d $SelGPUCC" #polytimos(fastest)
+    "hsr" = " -N 1 -d $($Config.SelGPUCC)" #Hsr(fastest)
+    "poly" = " -N 1 -d $($Config.SelGPUCC)" #polytimos(fastest)
     #"bitcore" = "" #Bitcore
-    "blake2s" = " -d $SelGPUCC --api-remote" #Blake2s
-    #"blakecoin" = " -d $SelGPUCC --api-remote" #Blakecoin
+    #"blake2s" = " -r 0 -d $($Config.SelGPUCC)" #Blake2s(fastest)
+    "x13" = " -d $($Config.SelGPUCC) -i 20 -N 1" #X13
     #"vanilla" = "" #BlakeVanilla
     #"cryptonight" = "" #Cryptonight
-    "veltor" = " -i 23 -d $SelGPUCC --api-remote" #Veltor
+    "veltor" = " -i 23 -d $($Config.SelGPUCC)" #Veltor(fastest)
     #"decred" = "" #Decred
     #"equihash" = "" #Equihash
     #"ethash" = "" #Ethash
     #"groestl" = "" #Groestl
     #"hmq1725" = "" #hmq1725
-    "keccak" = " -m 2 -i 29 -d $SelGPUCC" #Keccak
-	"keccakc" = " -i 29 -d $SelGPUCC" #Keccakc(fastest)
-    "lbry" = " -d $SelGPUCC --api-remote" #Lbry
-    "lyra2v2" = " -d $SelGPUCC -N 1 --api-remote" #Lyra2RE2
+    "keccak" = " -N 1 -m 2 -i 29 -d $($Config.SelGPUCC)" #Keccak(fastest)
+    "keccakc" = " -N 1 -i 29 -d $($Config.SelGPUCC)" #Keccakc(fastest)
+    "lbry" = " -d $($Config.SelGPUCC)" #Lbry
+    "lyra2v2" = " -d $($Config.SelGPUCC) -N 1" #Lyra2RE2(fastest) 
     #"lyra2z" = "" #Lyra2z
-    "myr-gr" = " -d $SelGPUCC -N 1" #MyriadGroestl
-    #"neoscrypt" = " -i 15 -d $SelGPUCC" #NeoScrypt
-    "nist5" = " -i 25.7 -d $SelGPUCC --api-remote" #Nist5
+    "myr-gr" = " -d $($Config.SelGPUCC) -N 1" #MyriadGroestl
+    #"neoscrypt" = " -i 15 -d $($Config.SelGPUCC)" #NeoScrypt
+    #"nist5" = " -r 0 -d $($Config.SelGPUCC)" #Nist5(fastest)
     #"pascal" = "" #Pascal
     #"qubit" = "" #Qubit
     #"scrypt" = "" #Scrypt
     #"sia" = "" #Sia
-    #"sib" = " -i 21 -d $SelGPUCC --api-remote" #Sib
-    "skein" = " -i 29 -d $SelGPUCC --api-remote" #Skein
+    #"sib" = " -i 21 -d $($Config.SelGPUCC)" #Sib(fastest)
+    "skein" = " -i 29 -N 1 -d $($Config.SelGPUCC)" #Skein(fastest)
     #"timetravel" = "" #Timetravel
-    "c11" = " -i 21 -d $SelGPUCC --api-remote" #C11
-    "x11evo" = " -N 1 -i 21 -d $SelGPUCC " #X11evo(fastest)
-    "x11gost" = " -i 21 -d $SelGPUCC --api-remote" #X11gost
-    "x17" = " -i 21.5 -d $SelGPUCC --api-remote" #X17
+    "c11" = " -N 1 -i 21 -d $($Config.SelGPUCC)" #C11(fastest)
+    "x11evo" = " -N 1 -i 21 -d $($Config.SelGPUCC) " #X11evo(fastest)
+    #"x11gost" = " -i 21 -d $($Config.SelGPUCC) --api-remote" #X11gost
+    "x17" = " -N 1 -i 21.5 -d $($Config.SelGPUCC)" #X17(fastest)
     #"yescrypt" = "" #Yescrypt
 }
 
@@ -45,12 +45,12 @@ $Commands | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | 
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path
-        Arguments = "-b $($Variables.MinerAPITCPPort) -a $_ -o stratum+tcp://$($Pools.(Get-Algorithm($_)).Host):$($Pools.(Get-Algorithm($_)).Port) -u $($Pools.(Get-Algorithm($_)).User) -p $($Pools.(Get-Algorithm($_)).Pass)$($Commands.$_)"
-        HashRates = [PSCustomObject]@{(Get-Algorithm($_)) = $Stats."$($Name)_$(Get-Algorithm($_))_HashRate".Day}
+        Arguments = "-b $($Variables.NVIDIAMinerAPITCPPort) -R 1 -a $_ -o stratum+tcp://$($Pools.(Get-Algorithm($_)).Host):$($Pools.(Get-Algorithm($_)).Port) -u $($Pools.(Get-Algorithm($_)).User) -p $($Pools.(Get-Algorithm($_)).Pass)$($Commands.$_)"
+        HashRates = [PSCustomObject]@{(Get-Algorithm($_)) = $Stats."$($Name)_$(Get-Algorithm($_))_HashRate".Week}
         API = "Ccminer"
-        Port = $Variables.MinerAPITCPPort #4068
+        Port = $Variables.NVIDIAMinerAPITCPPort #4068
         Wrap = $false
         URI = $Uri
-		User = $Pools.(Get-Algorithm($_)).User
+        User = $Pools.(Get-Algorithm($_)).User
     }
 }

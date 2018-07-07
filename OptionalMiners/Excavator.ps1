@@ -1,4 +1,4 @@
-. .\Include.ps1
+if (!(IsLoaded(".\Include.ps1"))) {. .\Include.ps1;RegisterLoaded(".\Include.ps1")}
 
 $Threads = 1
 
@@ -6,19 +6,19 @@ $Path = ".\Bin\Excavator\excavator.exe"
 $Uri = "https://github.com/nicehash/excavator/releases/download/v1.4.4a/excavator_v1.4.4a_NVIDIA_Win64.zip"
 
 $Commands = [PSCustomObject]@{
-    "blake2s" = @() #Blake2s
-    #"decred" = @() #Decred
-    "daggerhashimoto" = @() #Ethash
-    "equihash" = @() #Equihash
+    #"blake2s" = @() #Blake2s(alexis78 faster)
+    "keccak" = @() #keccak
+    "daggerhashimoto" = @() #Ethash(claymore faster)
+    "equihash" = @() #Equihash(dstm faster)
     #"lbry" = @() #Lbry
-    "lyra2rev2" = @() #Lyra2RE2
-    "neoscrypt" = @() #NeoScrypt
-    "nist5" = @() #nist5
+    "lyra2rev2" = @() #Lyra2RE2(excavator2 is faster)
+    "neoscrypt" = @() #NeoScrypt(fastest)
+    #"nist5" = @() #nist5(alexis78 faster)
     #"pascal" = @() #Pascal
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-$Port = $Variables.MinerAPITCPPort
+$Port = $Variables.NVIDIAMinerAPITCPPort
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     try {

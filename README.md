@@ -3,8 +3,8 @@ Copyright (c) 2018 Nemo		(https://github.com/nemosminer/NemosMiner)
 Copyright (c) 2018 MrPlus	(https://github.com/MrPlusGH/NPlusMiner)
 
  ![alt text](https://github.com/nemosminer/NemosMiner/blob/master/NM.png)
- # NemosMiner-v3.1
- Readme Updated 2018 April 14
+ # NemosMiner-v3.3
+ Updated 2018 July 8
  
 *****
 
@@ -19,21 +19,19 @@ NemosMiner Monitors mining pools in real-time in order to find the most profitab
 
 Easy configuration, easy start:
 
-      Run NemosMiner-v3.1.bat
+      Run NemosMiner-v3.3.bat
       1. Config tab
       2. Set your Wallet address and Username
-      3. Select your pool/s and load default Algos button. (Remove any algos you do not want to mine)
-      4. "Save Config"
-      5. Close
-      Run NemosMiner-v3.1.bat
-      6."Start"
+      3. Select your pool 
+      4. Save Config
+      5. Start
       
-      note: 1. you only need to change Username if you are using Miningpoolhub
+      note: 2. you only need to change Username if you are using Miningpoolhub
       
   Fee:
      
       There is a 8 minute per day fee (0.5%), that can be changed in the config (Minimum is 3)0.2%
-      We want to stay completely transparent on the way fees are managed in the product. Donations occurs once every 24 hours for the selected amount of time (default 5 minutes). The first donation sequence occurs 1 hour after miners are started. If Interval is set higher than the donation time, the interval will prime. Example for default parameters. Miners started at 10, First donation cycle runs at 10:52 untill 11, Next donation cycle occurs 24 hours after.All donation time and addresses are recording in the logs folder.
+      We want to stay completely transparent on the way fees are managed in the product. Donations occurs once every 24 hours for the selected amount of time (default 8 minutes). The first donation sequence occurs 1 hour after miners are started. If Interval is set higher than the donation time, the interval will prime. Example for default parameters. Miners started at 10, First donation cycle runs at 10:52 untill 11, Next donation cycle occurs 24 hours after.All donation time and addresses are recording in the logs folder.
 
 *****
 
@@ -85,10 +83,10 @@ Speical Thankyou To "MrPlus" amazing work with the GUI, PLUS profit calculations
 
         - When using advanced per pool configuration, it is possible to add a penalty factor for a specific pool. This simply adds as a multiplicator on estimations presented by the pool.
         - Example scenario
-          - NiceHash as a 4% fee - Set PricePenaltyFactor to 0.96 (1-0.04)
+          - NiceHash has a 4% fee - Set PricePenaltyFactor to 0.96 (1-0.04)
           - You feel like a pool is exaggerating his estimations by 10% - Set PricePenaltyFactor to 0.9
 
-   ahashpoolplus / zergpoolplus / zpoolplus / blazepoolplus
+   ahashpoolplus / zergpoolplus / zpoolplus / blazepoolplus / phiphipoolplus / blockmastersplus / hashrefineryplus / starpoolplus
    
       Uses calculations based on 24hractual and currentestimate ahashpool prices to get more realistic estimate.
       Includes some trust index based on past 1hr currentestimate variation from 24hr.
@@ -155,7 +153,7 @@ Speical Thankyou To "MrPlus" amazing work with the GUI, PLUS profit calculations
  
 
 If you have Windows 7, 8, or 8.1, please update PowerShell:
-https://www.microsoft.com/en-us/download/details.aspx?id=50395
+https://www.microsoft.com/en-us/download/details.aspx?id=54616
 
 CCMiner may need 'MSVCR120.dll' if you don't already have it:
 https://www.microsoft.com/en-gb/download/details.aspx?id=40784
@@ -165,7 +163,7 @@ https://www.microsoft.com/en-us/download/details.aspx?id=48145
 
 running multiple cards its recommended to increase Virtual Memory 64gb is optimal
 
-Requires nvidia driver newer than 388 (390.65 recommended) 
+Requires Nvidia driver 397.44 or newer
 
 Made For & Tested with 8x10603gb 6x1070 6x1070ti 6x1080ti (users have reported up to 12cards working have not tested myself)
 Some miners do not support more that 9 cards

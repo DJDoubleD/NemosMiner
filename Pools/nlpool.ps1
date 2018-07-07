@@ -17,16 +17,7 @@ $nlpool_Request | Get-Member -MemberType NoteProperty | Select -ExpandProperty N
 	$nlpool_Algorithm = Get-Algorithm $nlpool_Request.$_.name
 	$nlpool_Coin = ""
 
-	$Divisor = 1000000
-
-	switch ($nlpool_Algorithm) {
-		"equihash" {$Divisor /= 1000}
-		"blake2s" {$Divisor *= 1000}
-		"blakecoin" {$Divisor *= 1000}
-		"decred" {$Divisor *= 1000}
-		"keccak" {$Divisor *= 1000}
-		"keccakc" {$Divisor *= 1000}
-	}
+	$Divisor = 1000000 * [Double]$nlpool_Request.$_.mbtc_mh_factor
 
 	if ((Get-Stat -Name "$($Name)_$($nlpool_Algorithm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($nlpool_Algorithm)_Profit" -Value ([Double]$nlpool_Request.$_.estimate_last24h / $Divisor)}
 	else {$Stat = Set-Stat -Name "$($Name)_$($nlpool_Algorithm)_Profit" -Value ([Double]$nlpool_Request.$_.estimate_current / $Divisor * (1 - ($nlpool_Request.$_.fees / 100)))}

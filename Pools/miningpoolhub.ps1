@@ -16,18 +16,19 @@ $Locations | ForEach-Object {
     $Location = $_
 
     $MiningPoolHub_Request.return | ForEach-Object {
+		if ($_.algo -match "cryptonight-monero") { $_.algo = "cryptonightv7" }
         $Algorithm = $_.algo -replace "-"
         $Coin = (Get-Culture).TextInfo.ToTitleCase(($_.current_mining_coin -replace "-", " ")) -replace " "
 
         $Stat = Set-Stat -Name "$($Name)_$($Algorithm)_Profit" -Value ([decimal]$_.profit / 1000000000)
         $Price = (($Stat.Live * (1 - [Math]::Min($Stat.Day_Fluctuation, 1))) + ($Stat.Day * (0 + [Math]::Min($Stat.Day_Fluctuation, 1))))
 
-		$ConfName = if ($Config.PoolsConfig.$Name -ne $Null){$Name}else{"default"}
+        $ConfName = if ($Config.PoolsConfig.$Name -ne $Null) {$Name}else {"default"}
 	
         [PSCustomObject]@{
             Algorithm   = $Algorithm
             Info        = $Coin
-            Price       = $Stat.Live*$Config.PoolsConfig.$ConfName.PricePenaltyFactor
+            Price       = $Stat.Live * $Config.PoolsConfig.$ConfName.PricePenaltyFactor
             StablePrice = $Stat.Week
             Protocol    = 'stratum+tcp'
             Host        = $_.all_host_list.split(";") | Sort-Object -Descending {$_ -ilike "$Location*"} | Select-Object -First 1
@@ -41,7 +42,7 @@ $Locations | ForEach-Object {
         [PSCustomObject]@{
             Algorithm   = $Algorithm
             Info        = $Coin
-            Price       = $Stat.Live*$Config.PoolsConfig.$ConfName.PricePenaltyFactor
+            Price       = $Stat.Live * $Config.PoolsConfig.$ConfName.PricePenaltyFactor
             StablePrice = $Stat.Week
             Protocol    = 'stratum+ssl'
             Host        = $_.all_host_list.split(";") | Sort-Object -Descending {$_ -ilike "$Location*"} | Select-Object -First 1

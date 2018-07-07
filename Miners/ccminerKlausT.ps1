@@ -1,38 +1,41 @@
-. .\Include.ps1
+if (!(IsLoaded(".\Include.ps1"))) {. .\Include.ps1;RegisterLoaded(".\Include.ps1")}
 
 $Path = ".\Bin\NVIDIA-CcminerKlaust\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.21/ccminer-821-cuda91-x64.zip"
+$Uri = "https://github.com/nemosminer/ccminerKlausT-r11-fix/releases/download/r11-fix/ccminerKlausTr11.7z"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
     #"blake2s" = "" #Blake2s
-    "blakecoin" = " -i 29" #Blakecoin
+    #"blakecoin" = " -d $($Config.SelGPUCC)" #Blakecoin
     #"vanilla" = "" #BlakeVanilla
     #"cryptonight" = "" #Cryptonight
     #"decred" = "" #Decred
     #"equihash" = "" #Equihash
     #"ethash" = "" #Ethash
-    "groestl" = " -i 26 -d $SelGPUCC" #Groestl
+    "groestl" = " -i 26 -r 0 -d $($Config.SelGPUCC)" #Groestl(fastest)
     #"hmq1725" = "" #hmq1725
-    #"keccak" = " -i 29 -d $SelGPUCC" #Keccak
+    #"keccak" = " -d $($Config.SelGPUCC)" #Keccak
     #"lbry" = "" #Lbry
-    #"lyra2v2" = " -d $SelGPUCC" #Lyra2RE2
+    #"lyra2v2" = " -d $($Config.SelGPUCC)" #Lyra2RE2
     #"lyra2z" = "" #Lyra2z
-    #"myr-gr" = " -i 26 -d $SelGPUCC" #MyriadGroestl
-    "neoscrypt" = " -i 17.6 --cpu-priority 5 -b 4068 -d $SelGPUCC" #NeoScrypt
-    #"nist5" = " -d $SelGPUCC" #Nist5
+    #"myr-gr" = " -d $($Config.SelGPUCC)" #MyriadGroestl
+    "yescrypt" = " -d $($Config.SelGPUCC)" #yescrypt
+    "yescryptR8" = " -d $($Config.SelGPUCC)"
+    "yescryptR16" = " -d $($Config.SelGPUCC)" #YescryptR16 #Yenten
+    "yescryptR16v2" = " -d $($Config.SelGPUCC)" #PPN
+    "neoscrypt" = " -i 17 -d $($Config.SelGPUCC)" #NeoScrypt
+    #"nist5" = " -d $($Config.SelGPUCC)" #Nist5
     #"pascal" = "" #Pascal
     #"qubit" = "" #Qubit
     #"scrypt" = "" #Scrypt
     #"sia" = "" #Sia
     #"sib" = "" #Sib
-    #"skein" = " -i 29 -d $SelGPUCC" #Skein
+    #"skein" = " -d $($Config.SelGPUCC)" #Skein
     #"timetravel" = "" #Timetravel
     #"x11" = "" #X11
     #"veltor" = "" #Veltor
     #"x11evo" = "" #X11evo
-    #"x17" = "" #X17
-	#"c11" = " -i 22 -d $SelGPUCC" #C11
+    #"c11" = " -d $($Config.SelGPUCC)" #C11(alexis78-v1.2 faster)
     #"yescrypt" = "" #Yescrypt
 }
 
@@ -42,12 +45,12 @@ $Commands | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | 
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path
-        Arguments = "-b $($Variables.MinerAPITCPPort) -R 5 -a $_ -o stratum+tcp://$($Pools.(Get-Algorithm($_)).Host):$($Pools.(Get-Algorithm($_)).Port) -u $($Pools.(Get-Algorithm($_)).User) -p $($Pools.(Get-Algorithm($_)).Pass)$($Commands.$_)"
-        HashRates = [PSCustomObject]@{(Get-Algorithm($_)) = $Stats."$($Name)_$(Get-Algorithm($_))_HashRate".Day}
+        Arguments = "-b $($Variables.NVIDIAMinerAPITCPPort) -N 1 -R 1 -a $_ -o stratum+tcp://$($Pools.(Get-Algorithm($_)).Host):$($Pools.(Get-Algorithm($_)).Port) -u $($Pools.(Get-Algorithm($_)).User) -p $($Pools.(Get-Algorithm($_)).Pass)$($Commands.$_)"
+        HashRates = [PSCustomObject]@{(Get-Algorithm($_)) = $Stats."$($Name)_$(Get-Algorithm($_))_HashRate".Week}
         API = "Ccminer"
-        Port = $Variables.MinerAPITCPPort
+        Port = $Variables.NVIDIAMinerAPITCPPort
         Wrap = $false
         URI = $Uri
- 		User = $Pools.(Get-Algorithm($_)).User
-   }
+        User = $Pools.(Get-Algorithm($_)).User
+    }
 }
