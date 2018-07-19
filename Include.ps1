@@ -404,6 +404,31 @@ function Get-HashRate {
                     Start-Sleep $Interval
                 } while ($HashRates.Count -lt 6)
             }
+			"trex" {
+                $Message = "summary"
+
+                do {
+                    $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+                    $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
+                    $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                    $Writer.AutoFlush = $true
+
+                    $Writer.WriteLine($Message)
+                    $Request = $Reader.ReadLine()
+
+                    $Data = $Request -split ";" | ConvertFrom-StringData
+
+                    $HashRate = if ([Double]$Data.KHS -ne 0 -or [Double]$Data.ACC -ne 0) {$Data.KHS}
+
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
+
+                    $HashRates += [Double]$HashRate
+
+                    if (-not $Safe) {break}
+
+                    Start-Sleep $Interval
+                } while ($HashRates.Count -lt 6)
+            }
             "XMRig" {
                 $Message = "summary"
 
@@ -698,8 +723,8 @@ function Expand-WebRequest {
     $FileName = "$FolderName_New$(([IO.FileInfo](Split-Path $Uri -Leaf)).Extension)"
 
     if (Test-Path $FileName) {Remove-Item $FileName}
-    if (Test-Path "$(Split-Path $Path)\$FolderName_New") {Remove-Item "$(Split-Path $Path)\$FolderName_New" -Recurse}
-    if (Test-Path "$(Split-Path $Path)\$FolderName_Old") {Remove-Item "$(Split-Path $Path)\$FolderName_Old" -Recurse}
+    if (Test-Path "$(Split-Path $Path)\$FolderName_New") {Remove-Item "$(Split-Path $Path)\$FolderName_New" -Force -Recurse}
+    if (Test-Path "$(Split-Path $Path)\$FolderName_Old") {Remove-Item "$(Split-Path $Path)\$FolderName_Old" -Force -Recurse}
 
     Invoke-WebRequest $Uri -OutFile $FileName -TimeoutSec 15 -UseBasicParsing
     Start-Process "7z" "x $FileName -o$(Split-Path $Path)\$FolderName_Old -y -spe" -Wait
@@ -814,6 +839,12 @@ Function Autoupdate {
             Start-Process "7z" "a $($BackupFileName) .\* -x!*.zip" -Wait -WindowStyle hidden
             If (!(test-path .\$BackupFileName)) {Update-Status("Backup failed"); return}
             
+            # Pre update specific actions if any
+            # Use PreUpdateActions.ps1 in new release to place code
+            If (Test-Path ".\$UpdateFileName\PreUpdateActions.ps1") {
+				Invoke-Expression (get-content ".\$UpdateFileName\PreUpdateActions.ps1" -Raw)
+			}
+            
             # unzip in child folder excluding config
             Update-Status("Unzipping update...")
             Start-Process "7z" "x $($UpdateFileName).zip -o.\ -y -spe -xr!config" -Wait -WindowStyle hidden
@@ -822,17 +853,18 @@ Function Autoupdate {
             Update-Status("Copying files...")
             Copy-Item .\$UpdateFileName\* .\ -force -Recurse
 
-            # update specific actions if any
-            # Use UpdateActions.ps1 in new release to place code
-            If (Test-Path ".\$UpdateFileName\UpdateActions.ps1") {
-                Invoke-Expression (get-content ".\$UpdateFileName\UpdateActions.ps1" -Raw)
+            # Post update specific actions if any
+            # Use PostUpdateActions.ps1 in new release to place code
+            If (Test-Path ".\$UpdateFileName\PostUpdateActions.ps1") {
+				Invoke-Expression (get-content ".\$UpdateFileName\PostUpdateActions.ps1" -Raw)
             }
             
             #Remove temp files
             Update-Status("Removing temporary files...")
             Remove-Item .\$UpdateFileName -Force -Recurse
             Remove-Item ".\$($UpdateFileName).zip" -Force
-            If (Test-Path ".\UpdateActions.ps1") {Remove-Item ".\UpdateActions.ps1" -Force}
+            If (Test-Path ".\PreUpdateActions.ps1") {Remove-Item ".\PreUpdateActions.ps1" -Force}
+            If (Test-Path ".\PostUpdateActions.ps1") {Remove-Item ".\PostUpdateActions.ps1" -Force}
             
             # Start new instance (Wait and confirm start)
             # Kill old instance

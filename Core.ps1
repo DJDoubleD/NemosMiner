@@ -160,12 +160,8 @@ Function NPMCycle {
     $Variables.StatusText = "Loading pool stats.."
     $PoolFilter = @()
     $Config.PoolName | foreach {$PoolFilter += ($_ += ".*")}
-    $AllPools = if (Test-Path "Pools") {Get-ChildItemContent "Pools" -Include $PoolFilter | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | 
-            # Use location as preference and not the only one
-        # Where Location -EQ $Config.Location | 
-        Where SSL -EQ $Config.SSL | 
-            Where {$Config.PoolName.Count -eq 0 -or (Compare $Config.PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0}
-    }
+    $AllPools = if(Test-Path "Pools"){Get-ChildItemContent "Pools" -Include $PoolFilter | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | 
+        Where {$_.SSL -EQ $Config.SSL -and ($Config.PoolName.Count -eq 0 -or ($_.Name -in $Config.PoolName)) -and ($_.Algorithm -in $Config.Algorithm)}}
     $Variables.StatusText = "Computing pool stats.."
     # Use location as preference and not the only one
     $AllPools = ($AllPools | ? {$_.location -eq $Config.Location}) + ($AllPools | ? {$_.name -notin ($AllPools | ? {$_.location -eq $Config.Location}).Name})
@@ -194,7 +190,7 @@ Function NPMCycle {
         Compare-Object $Variables.MinersHash (Get-ChildItem .\Miners\ -filter "*.ps1" | Get-FileHash) -Property "Hash", "Path" | Sort "Path" -Unique | % {
             $Variables.StatusText = "Miner Updated: $($_.Path)"
             $NewMiner = &$_.path
-            If (Test-Path (Split-Path $NewMiner.Path)) {Remove-Item -Recurse (Split-Path $NewMiner.Path)}
+            If (Test-Path (Split-Path $NewMiner.Path)) {Remove-Item -Force -Recurse (Split-Path $NewMiner.Path)}
             $Variables.MinersHash = Get-ChildItem .\Miners\ -filter "*.ps1" | Get-FileHash
             $Variables.MinersHash | ConvertTo-Json | out-file ".\Config\MinersHash.json"
         }
@@ -371,7 +367,7 @@ Function NPMCycle {
         if ($filtered.Count -gt 0) {
             if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
                 # Log switching information to .\log\swicthing.log
-                [pscustomobject]@{date=(get-date);Type=$_.Type;algo=$_.Algorithms;wallet=$_.User;username=$Config.UserName;Stratum="$($_.Arguments.Split(' ') | ?{$_ -match 'stratum'})"} | export-csv .\Logs\switching.log -Append -NoTypeInformation
+                [pscustomobject]@{date=(get-date);Type=$_.Type;algo=$_.Algorithms;wallet=$_.User;username=$Config.UserName;Stratum="$($_.Arguments.Split(' ') | ?{($_ -like '*.*:*') -and (-not ($_.Contains($Variables.NVIDIAMinerAPITCPPort) -or ($_.contains($Variables.CPUMinerAPITCPPort))))})"} | export-csv .\Logs\switching.log -Append -NoTypeInformation
 
                 # Launch prerun if exists
                 If ($_.Type -ne "CPU") {
@@ -479,7 +475,7 @@ Function NPMCycle {
     #>
     $Variables.ActiveMinerPrograms | Where {$_.Status -ne "Running"} | foreach {$_.process = $_.process | select HasExited,StartTime,ExitTime}
     $ActiveMinerProgramsCOPY = @()
-    $Variables.ActiveMinerPrograms | % {$ActiveMinerCOPY = [PSCustomObject]@{}; $_.psobject.properties | sort Name | % {$ActiveMinerCOPY | Add-Member -Force @{$_.Name = $_.Value}}; $ActiveMinerProgramsCOPY += $ActiveMinerCOPY}
+    $Variables.ActiveMinerPrograms | %{$ActiveMinerCOPY = [PSCustomObject]@{}; $_.psobject.properties | sort Name | %{$ActiveMinerCOPY | Add-Member -Force @{$_.Name = $_.Value}};$ActiveMinerProgramsCOPY += $ActiveMinerCOPY}
     $Variables.ActiveMinerPrograms = $ActiveMinerProgramsCOPY
     rv ActiveMinerProgramsCOPY
     rv ActiveMinerCOPY
@@ -488,15 +484,19 @@ Function NPMCycle {
     $Global:Error.clear()
     
     Get-Job | ? {$_.State -eq "Completed"} | Remove-Job
-    $Variables.BrainJobs | % {$_.ChildJobs | % {$_.Error.Clear()}}
-    $Variables.BrainJobs | % {$_.ChildJobs | % {$_.Progress.Clear()}}
-    $Variables.BrainJobs.ChildJobs | % {$_.Output.Clear()}
-    $Variables.EarningsTrackerJobs | % {$_.ChildJobs | % {$_.Error.Clear()}}
-    $Variables.EarningsTrackerJobs | % {$_.ChildJobs | % {$_.Progress.Clear()}}
-    $Variables.EarningsTrackerJobs.ChildJobs | % {$_.Output.Clear()}
+    if ($Variables.BrainJobs.count -gt 0){
+        $Variables.BrainJobs | % {$_.ChildJobs | % {$_.Error.Clear()}}
+        $Variables.BrainJobs | % {$_.ChildJobs | % {$_.Progress.Clear()}}
+        $Variables.BrainJobs.ChildJobs | % {$_.Output.Clear()}
+    }
+    if ($Variables.EarningsTrackerJobs.count -gt 0) {
+        $Variables.EarningsTrackerJobs | % {$_.ChildJobs | % {$_.Error.Clear()}}
+        $Variables.EarningsTrackerJobs | % {$_.ChildJobs | % {$_.Progress.Clear()}}
+        $Variables.EarningsTrackerJobs.ChildJobs | % {$_.Output.Clear()}
+    }
 
     # Mostly used for debug. Will execute code found in .\EndLoopCode.ps1 if exists.
-    if (Test-Path ".\EndLoopCode.ps1") {Invoke-Expression (Get-Content ".\EndLoopCode.ps1" -Raw)}
+    if (Test-Path ".\EndLoopCode.ps1"){Invoke-Expression (Get-Content ".\EndLoopCode.ps1" -Raw)}
     $Variables | Add-Member -Force @{EndLoop = $True}
     $Variables.StatusText = "Sleeping $($Variables.TimeToSleep)"
     # Sleep $Variables.TimeToSleep

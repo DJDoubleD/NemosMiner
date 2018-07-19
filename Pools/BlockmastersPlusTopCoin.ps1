@@ -1,28 +1,34 @@
 if (!(IsLoaded(".\Include.ps1"))) {. .\Include.ps1;RegisterLoaded(".\Include.ps1")}
 
-try {
-    $Request = Invoke-WebRequest "http://pool.hashrefinery.com/api/status" -UseBasicParsing -Headers @{"Cache-Control" = "no-cache"} | ConvertFrom-Json 
+Try {
+    $Request = get-content ((split-path -parent (get-item $script:MyInvocation.MyCommand.Path).Directory) + "\BrainPlus\BlockmastersPlusTopCoin\BlockmastersPlusTopCoin.json") | ConvertFrom-Json
+    $CoinsRequest = Invoke-WebRequest "http://blockmasters.co/api/currencies" -UseBasicParsing -Headers @{"Cache-Control" = "no-cache"} | ConvertFrom-Json 
 }
 catch { return }
 
-if (-not $Request) {return}
+if ((-not $Request) -or (-not $CoinsRequest)) {return}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
-$HostSuffix = ".us.hashrefinery.com"
+$HostSuffix = "blockmasters.co"
 $PriceField = "actual_last24h"
 # $PriceField = "estimate_current"
-$DivisorMultiplier = 1000000000
- 
+$DivisorMultiplier = 1000000
 $Location = "US"
 
-# Placed here for Perf (Disk reads)
-	$ConfName = if ($Config.PoolsConfig.$Name -ne $Null){$Name}else{"default"}
-    $PoolConf = $Config.PoolsConfig.$ConfName
+$ConfName = if ($Config.PoolsConfig.$Name -ne $Null){$Name}else{"default"}
+$PoolConf = $Config.PoolsConfig.$ConfName
 
+$AllMiningCoins = @()
+($CoinsRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | %{$CoinsRequest.$_ | Add-Member -Force @{Symbol = if ($CoinsRequest.$_.Symbol) {$CoinsRequest.$_.Symbol} else {$_}} ; $AllMiningCoins += $CoinsRequest.$_}
+$AllMiningCoins = $AllMiningCoins | where {($_.noautotrade -eq 0) -and ($_.hashrate -gt 0)}
+
+#Uses BrainPlus calculated price
 $Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
-    $PoolHost = "$($_)$($HostSuffix)"
+    $PoolHost = "$($HostSuffix)"
     $PoolPort = $Request.$_.port
     $PoolAlgorithm = Get-Algorithm $Request.$_.name
+    # Find best coin for algo
+    $TopCoin = $AllMiningCoins | group algo | where {(Get-Algorithm $_.name) -eq $PoolAlgorithm} | foreach {$_.group | sort -Property @{Expression = {$_.estimate / ($DivisorMultiplier * [Double]$_.mbtc_mh_factor)}} -Descending | select -first 1}
 
     $Divisor = $DivisorMultiplier * [Double]$Request.$_.mbtc_mh_factor
 
@@ -31,11 +37,11 @@ $Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty N
 
 	$PwdCurr = if ($PoolConf.PwdCurrency) {$PoolConf.PwdCurrency}else {$Config.Passwordcurrency}
     $WorkerName = If ($PoolConf.WorkerName -like "ID=*") {$PoolConf.WorkerName} else {"ID=$($PoolConf.WorkerName)"}
-	
     if ($PoolConf.Wallet) {
         [PSCustomObject]@{
             Algorithm     = $PoolAlgorithm
-            Info          = "$ahashpool_Coin $ahashpool_Coinname"
+            Coin          = $TopCoin.Symbol
+            Info          = $TopCoin.Name
             Price         = $Stat.Live*$PoolConf.PricePenaltyFactor
             StablePrice   = $Stat.Week
             MarginOfError = $Stat.Week_Fluctuation
@@ -43,7 +49,7 @@ $Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty N
             Host          = $PoolHost
             Port          = $PoolPort
             User          = $PoolConf.Wallet
-		    Pass          = "$($WorkerName),c=$($PwdCurr)"
+		    Pass          = If ($TopCoin.Symbol) {"$($WorkerName),c=$($PwdCurr),mc=$($TopCoin.Symbol)"} else {"$($WorkerName),c=$($PwdCurr)"}
             Location      = $Location
             SSL           = $false
         }

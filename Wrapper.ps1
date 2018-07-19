@@ -13,7 +13,7 @@ param(
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 
-if (!(IsLoaded(".\Include.ps1"))) {. .\Include.ps1; RegisterLoaded(".\Include.ps1")}
+. .\Include.ps1
 
 Remove-Item ".\Wrapper_.txt" -ErrorAction Ignore
 
@@ -54,6 +54,32 @@ do {
                 "KS/s" {$HashRate *= [Math]::Pow(1000, 1)}
                 "mS/s" {$HashRate *= [Math]::Pow(1000, 2)}
                 "MS/s" {$HashRate *= [Math]::Pow(1000, 2)}
+            }
+            $HashRate = [int]$HashRate
+            $HashRate | Set-Content ".\Bminer.txt"
+            }
+            elseif ($Line -like "*Average speed*") {
+            $Words = $Line -split " "
+            $HashRate = [Decimal]$Words[$Words.IndexOf(($Words -like "*/s" | Select-Object -Last 1)) - 1]
+
+            switch ($Words[$Words.IndexOf(($Words -like "*/s" | Select-Object -Last 1))]) {
+                
+                "mh/s" {$HashRate *= [Math]::Pow(1000, 1)}
+                "MH/s" {$HashRate *= [Math]::Pow(1000, 1)}
+               
+            }
+
+            $HashRate | Set-Content ".\Bminer.txt"
+        }
+        elseif ($Line -like "*Average speed*") {
+            $Words = $Line -split " "
+            $HashRate = [Decimal]($Words -like "*/s*" -replace ',', '' -replace "[^0-9.]", '' | Select-Object -Last 1)
+
+            switch ($Words -like "*/s*" -replace "[0-9.,]", '' | Select-Object -Last 1) {
+              
+                "mH/s" {$HashRate *= [Math]::Pow(1000, 1)}
+                "MH/s" {$HashRate *= [Math]::Pow(1000, 1)}
+             
             }
             $HashRate = [int]$HashRate
             $HashRate | Set-Content ".\Bminer.txt"
